@@ -50,7 +50,8 @@ They can run a task the plugin provides that will record the time:
 In this second exercise, you will add the extension so users can configure the plugin.
 
 ---
-### Create extension interface
+### Steps
+#### 1. Create extension interface
 
 Next to `RecordstrPlugin`, create a Kotlin interface called `RecordstrExtension`:
 
@@ -76,15 +77,34 @@ interface RecordstrExtension {
 ```
 
 ---
-### Create extension object
+#### 2. Create extension object
 
-Now create an extension object in `RecordstrPlugin` using this interface. Set
-default values for the variables:
+Now create an extension object in the `apply` method inside the `RecordstrPlugin`
+class using this interface. Set default values for the variables:
 
 ```kotlin
 val extension = project.extensions.create("recordstr", RecordstrExtension::class.java)
 extension.str.convention("hello world!")
 extension.helloFile.convention(project.layout.buildDirectory.file("hello.txt"))
+```
+
+The code should now look as follows:
+
+```kotlin
+class RecordstrPlugin: Plugin<Project> {
+    override fun apply(project: Project) {
+        val extension = project.extensions.create("recordstr", RecordstrExtension::class.java)
+        extension.str.convention("hello world!")
+        extension.helloFile.convention(project.layout.buildDirectory.file("hello.txt"))
+
+        // Register a task
+        project.tasks.register("greeting") { task ->
+            task.doLast {
+                println("Hello from plugin 'com.gradlelab.recordstr'")
+            }
+        }
+    }
+}
 ```
 
 Build the plugin:
@@ -94,7 +114,7 @@ Build the plugin:
 ```
 
 ---
-### Manually verify extension available
+#### 3. Manually verify extension available
 
 In the `plugin_consumer` project, reload the Gradle configuration in the editor.
 Then in the build file, verify you can access the configuration for the plugin
